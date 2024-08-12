@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<Xdmf xmlns:xi="http://www.w3.org/2001/XInclude" Version="2.0">
+<Domain>
+<Grid Name="position_0_5.h5" GridType="Uniform">
+
+    <Time Value="5 megayear" />
+
+    <Topology Type="POLYVERTEX" NodesPerElement="6"> </Topology>
+        <Geometry Type="XYZ">
+            <DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="6 3">position_0_5.h5:/data</DataItem>
+        </Geometry>
+</Grid>
+</Domain>
+</Xdmf>

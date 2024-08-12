@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<Xdmf xmlns:xi="http://www.w3.org/2001/XInclude" Version="2.0">
+<Domain>
+<Grid Name="swarm-15.h5" GridType="Uniform">
+
+	<Time Value="7.499999999999997 megayear" />
+
+	<Topology Type="POLYVERTEX" NodesPerElement="1664640"> </Topology>
+		<Geometry Type="XYZ">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="1664640 3">swarm-15.h5:/data</DataItem>
+		</Geometry>
+	<Attribute Type="Scalar" Center="Node" Name="materialField">
+			<DataItem Format="HDF" NumberType="Int" Precision="4" Dimensions="1664640 1">materialField-15.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Scalar" Center="Node" Name="plasticStrain">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="1664640 1">plasticStrain-15.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Scalar" Center="Node" Name="meltField">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="1664640 1">meltField-15.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Scalar" Center="Node" Name="timeField">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="1664640 1">timeField-15.h5:/data</DataItem>
+	</Attribute>
+</Grid>
+</Domain>
+</Xdmf>

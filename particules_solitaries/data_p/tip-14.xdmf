@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<Xdmf xmlns:xi="http://www.w3.org/2001/XInclude" Version="2.0">
+<Domain>
+<Grid Name="tip-14.h5" GridType="Uniform">
+
+	<Time Value="6.999999999999997 megayear" />
+
+	<Topology Type="POLYVERTEX" NodesPerElement="3"> </Topology>
+		<Geometry Type="XYZ">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="3 3">tip-14.h5:/data</DataItem>
+		</Geometry>
+	<Attribute Type="Scalar" Center="Node" Name="global_index">
+			<DataItem Format="HDF" NumberType="Int" Precision="8" Dimensions="3 1">tip_global_index-14.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Tensor" Center="Node" Name="velocitygradient">
+			<DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="3 9">tip_velocitygradient-14.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Vector" Center="Node" Name="velocityfield">
+			<DataItem Format="HDF" NumberType="Float" Precision="4" Dimensions="3 3">tip_velocityfield-14.h5:/data</DataItem>
+	</Attribute>
+	<Attribute Type="Tensor6" Center="Node" Name="strainratetensor">
+	<DataItem ItemType="Function"  Dimensions="3 6" Function="JOIN($0, $3, $4, $1, $5, $2)">
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x0">
+			<DataItem Dimensions="3 2" Format="XML"> 0 0 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x1">
+			<DataItem Dimensions="3 2" Format="XML"> 0 1 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x2">
+			<DataItem Dimensions="3 2" Format="XML"> 0 2 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x3">
+			<DataItem Dimensions="3 2" Format="XML"> 0 3 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x4">
+			<DataItem Dimensions="3 2" Format="XML"> 0 4 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+		<DataItem ItemType="HyperSlab" Dimensions="3 1" Name="x5">
+			<DataItem Dimensions="3 2" Format="XML"> 0 5 1 1 3 1 </DataItem>
+			<DataItem Format="HDF" Dimensions="3 1">tip_strainratetensor-14.h5:/data</DataItem>
+		</DataItem>
+	</DataItem>
+	</Attribute>
+</Grid>
+</Domain>
+</Xdmf>

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<Xdmf xmlns:xi="http://www.w3.org/2001/XInclude" Version="2.0">
+<Domain>
+<Grid Name="lag-5.h5" GridType="Uniform">
+
+	<Time Value="2.499999999999999 megayear" />
+
+	<Topology Type="POLYVERTEX" NodesPerElement="1000"> </Topology>
+		<Geometry Type="XYZ">
+			<DataItem Format="HDF" NumberType="Float" Precision="8" Dimensions="1000 3">lag-5.h5:/data</DataItem>
+		</Geometry>
+	<Attribute Type="Scalar" Center="Node" Name="global_index">
+			<DataItem Format="HDF" NumberType="Int" Precision="8" Dimensions="1000 1">lag_global_index-5.h5:/data</DataItem>
+	</Attribute>
+</Grid>
+</Domain>
+</Xdmf>

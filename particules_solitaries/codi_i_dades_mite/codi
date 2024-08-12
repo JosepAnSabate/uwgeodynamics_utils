@@ -1,0 +1,176 @@
+import UWGeodynamics as GEO
+import numpy as np
+from UWGeodynamics import visualisation as vis
+from underworld import function as fn
+import underworld as uw
+import os
+from underworld import mesh
+
+u = GEO.UnitRegistry
+
+half_rate = 1.0 * u.centimeter / u.year
+model_length = 6000. * u.kilometer
+surfaceTemp = 273.15 * u.degK
+baseModelTemp = 1900. * u.degK
+bodyforce = 3300 * u.kilogram / u.metre**3 * 9.81 * u.meter / u.second**2
+
+KL = model_length
+Kt = KL / half_rate
+KM = bodyforce * KL**2 * Kt**2
+
+GEO.scaling_coefficients["[length]"] = KL
+GEO.scaling_coefficients["[time]"] = Kt
+GEO.scaling_coefficients["[mass]"]= KM
+
+
+Model = GEO.Model(elementRes=(34, 34, 12),
+                  minCoord=(0. * u.kilometer, -0. * u.kilometer, -680. * u.kilometer),
+                  maxCoord=(4000. * u.kilometer, 2000. * u.kilometer, 20. * u.kilometer),
+                  gravity=(0.0 ,0.0, -9.81 * u.meter / u.second**2))
+
+Model.outputDir="dilluns_4000_2000_p3340_190proc"
+
+StickyAir = Model.add_material(name="StickyAir", shape=GEO.shapes.Layer3D(top=Model.top, bottom=0. * u.kilometer))
+
+OverPlate = Model.add_material(name="OverPlate", shape=GEO.shapes.Layer3D(top=0. * u.kilometer, bottom=-120. * u.kilometer))
+
+Mantle = Model.add_material(name="Mantle", shape=GEO.shapes.Layer3D(top=-120. * u.kilometer, bottom=Model.bottom))
+
+top    = GEO.shapes.HalfSpace(normal=(0.,0.,1.),
+            origin=(6450.*u.kilometer,1000.*u.kilometer,-0.*u.kilometer))
+right  = GEO.shapes.HalfSpace(normal=(1.,0.,0.),
+            origin=(9000.*u.kilometer,1000.*u.kilometer,-0.*u.kilometer))
+bottom = GEO.shapes.HalfSpace(normal=(0.,0.,-1.),
+            origin=(6450.*u.kilometer,1000.*u.kilometer,-120.*u.kilometer))
+left   = GEO.shapes.HalfSpace(normal=(-1.,0.,1.),
+            origin=(1400.*u.kilometer,1000.*u.kilometer,-60.*u.kilometer))
+back = GEO.shapes.HalfSpace(normal=(0.,1.,0.),
+            origin=(6450.*u.kilometer,1750.*u.kilometer,-60.*u.kilometer))
+front = GEO.shapes.HalfSpace(normal=(0.,-1.,0.),
+            origin=(6450.*u.kilometer,250.*u.kilometer,-60.*u.kilometer))
+CompositeShape_Polygon1 = top & right & bottom & left & back & front
+
+top2    = GEO.shapes.HalfSpace(normal=(0.,0.,1.),
+            origin=(1500.*u.kilometer,1000.*u.kilometer,-0.*u.kilometer))
+
+right2  = GEO.shapes.HalfSpace(normal=(1.,0.,-1.),
+            origin=(1437*u.kilometer,1000.*u.kilometer,-168.*u.kilometer))
+
+bottom2 = GEO.shapes.HalfSpace(normal=(-1.,0.,0.),
+            origin=(1280*u.kilometer,1000.*u.kilometer,-350.*u.kilometer))
+
+
+left2   = GEO.shapes.HalfSpace(normal=(-1.,0.,1.),
+            origin=(1320.*u.kilometer,1000.*u.kilometer,-112.*u.kilometer))
+
+back = GEO.shapes.HalfSpace(normal=(0.,1.,0.),
+                            origin=(1467.*u.kilometer,1750.*u.kilometer,-1436.*u.kilometer))
+front = GEO.shapes.HalfSpace(normal=(0.,-1.,0.),
+                            origin=(1467.*u.kilometer,250.*u.kilometer,-146.*u.kilometer))
+
+CompositeShape_Polygon2 = top2 & right2 & bottom2 & left2 & back & front
+
+CompositeShape = CompositeShape_Polygon1 | CompositeShape_Polygon2
+Lithosphere = Model.add_material(name="Lithosphere", shape=CompositeShape)
+
+OverPlate.viscosity = 1e20 * u.pascal * u.second
+StickyAir.viscosity = 5e18 * u.pascal * u.second
+Lithosphere.viscosity = 1e24 * u.pascal * u.second
+
+rh = GEO.ViscousCreepRegistry()
+#dir(rh)
+Mantle.viscosity = rh.Dry_Olivine_Dislocation_Korenaga_and_Karato_2008
+
+OverPlate.density = 3180. * u.kilogram / u.metre**3
+StickyAir.density = 1. * u.kilogram / u.metre**3
+Mantle.density = 3200. * u.kilogram / u.metre**3
+Lithosphere.density = 3340. * u.kilogram / u.metre**3
+
+pl = GEO.PlasticityRegistry()
+#dir(pl)
+OverPlate.plasticity = pl.Rey_and_Muller_2010_LithosphericMantle
+Lithosphere.plasticity = pl.Rey_and_Muller_2010_LithosphericMantle
+Mantle.plasticity = pl.Watremez_et_al_2013_AsthenosphericMantle
+
+#Lithosphere.elasticity = GEO.Elasticity(shear_modulus=4.*u.gigapascal, observation_time=20000. * u.year)
+
+# Boonma bibliography, escull aquesta perquè li convé
+#Model.diffusivity = 1e-06 * u.metre**2 * u.seconds**-1
+#Mantle.diffusivity = 1e-05 * u.metre**2 * u.seconds**-1
+
+# Meva pròpia
+Model.diffusivity = 1e-06 * u.metre**2 * u.seconds**-1
+OverPlate.diffusivity = 1e-06 * u.metre**2 * u.seconds**-1
+Mantle.diffusivity = 2e-05 * u.metre**2 * u.seconds**-1
+Lithosphere.diffusivity = 1e-06 * u.metre**2 * u.seconds**-1
+StickyAir.diffusivity = 2e-05 * u.metre**2 * u.seconds**-1    # http://www.mhtl.uwaterloo.ca/old/onlinetools/airprop/airprop.html
+
+Model.capacity    = 1000. * u.joule / (u.kelvin * u.kilogram)
+Mantle.capacity    = 1000. * u.joule / (u.kelvin * u.kilogram)
+
+
+Model.set_velocityBCs(left=[0., None, None], right=[0., None, None],
+                      bottom=[None, None, 0.], top=[None, None, 0.],
+                      front=[None, 0., None], back=[None, 0., None])
+
+Model.set_temperatureBCs(top=surfaceTemp, bottom=baseModelTemp)
+
+
+strainRateTensor = fn.tensor.symmetric(Model.velocityField.fn_gradient)
+
+secondInvariantStrainRateTensor = fn.tensor.second_invariant(
+                      fn.tensor.deviatoric(
+                      fn.tensor.symmetric(Model.velocityField.fn_gradient)))
+
+velocityGradient = Model.velocityField.fn_gradient
+
+cxpos = np.linspace(GEO.nd(1400. * u.kilometer), GEO.nd( 2000. *u.kilometer), 10)
+cypos = np.linspace(GEO.nd(300. * u.kilometer), GEO.nd(1700. * u.kilometer), 10)
+czpos = np.linspace(GEO.nd(-150. * u.kilometer), GEO.nd(-600. * u.kilometer), 10)
+#z
+cxpos, cypos, czpos = np.meshgrid(cxpos, cypos, czpos)
+centroid_coords = np.ndarray((len(cxpos.ravel()), 3))
+
+centroid_coords[:, 0] = cxpos.ravel()
+centroid_coords[:, 1] = cypos.ravel()
+centroid_coords[:, 2] = czpos.ravel()
+
+point = np.zeros((1, 3))
+
+Model.add_passive_tracers(name="lag", vertices=point, centroids=centroid_coords)
+
+Model.lag_tracers.add_tracked_field(velocityGradient,
+                                           name="velocityGradient",
+                                           units=u.second**-1,
+                                            dataType="float",
+                                           count=9,
+                                            overwrite=True)
+
+
+Model.lag_tracers.add_tracked_field(Model.velocityField,
+                                           name="velocityField",
+                                           units=u.m / u.second,
+                                            dataType="float",
+                                           count=3,
+                                            overwrite=True)
+
+Model.lag_tracers.add_tracked_field(strainRateTensor,
+                              name="strainRateTensor",
+                              units= u.second**-1,
+                              dataType="float",
+                              count=6,
+                              overwrite=True)
+
+
+Model.init_model(temperature="steady-state", pressure="lithostatic")
+
+
+
+Model.solver.set_inner_method("mumps")
+Model.solver.set_penalty(1e6)
+GEO.rcParams['nonlinear.tolerance'] = 2.9e-2
+GEO.rcParams['initial.nonlinear.tolerance'] = 2.9e-2
+
+
+Model.run_for(3. * u.megayears, checkpoint_interval=.5* u.megayears)
+
