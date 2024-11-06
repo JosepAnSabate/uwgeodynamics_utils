@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#SBATCH --job-name=test_code
+#SBATCH --output=script_de_python.out
+#SBATCH --error=script_de_python.err
+#SBATCH --ntasks=800
+#SBATCH --account=csic101
+##SBATCH --qos=gp_debug
+#SBATCH --qos=gp_resa
+
+
+module load singularity
+
+
+srun singularity exec /home/ictj/ictj853788/uwgeodynamics_v2.12.5.sif python linia_d_r.py
